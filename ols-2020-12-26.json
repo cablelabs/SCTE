@@ -1,0 +1,183 @@
+---
+swagger: "2.0"
+info:
+  description: "Defines Data Model of Optimal Load Shape module.\n\n        This model\
+    \ supports the Optimal Load Shape framework defined by the SCTE. An OLS signal\n\
+    \        may be generated and made available by an electrical service provider\
+    \ daily, to allow electrical load\n        generators to time their consumption\
+    \ to match the provider's optimal load shape. E.g. an electrical\n        vehicle\
+    \ charger may spread load throughout the night to attenuate an evening peak.\n\
+    \n        For geo-location definition see https://tools.ietf.org/id/draft-ietf-netmod-geo-location-02.xml#rfc.section.A\n\
+    \n        Copyright (C) Pajarito Technologies LLC\n        "
+  version: "1.0"
+  title: "ols API"
+host: "localhost:1234"
+consumes:
+- "application/yang-data+json"
+produces:
+- "application/yang-data+json"
+paths:
+  /data/ols/:
+    get:
+      tags:
+      - "ols"
+      summary: "returns ols.Ols"
+      description: "returns ols.Ols"
+      parameters: []
+      responses:
+        200:
+          description: "ols.Ols"
+          schema:
+            $ref: "#/definitions/ols.OlsWrapper"
+        400:
+          description: "Internal error"
+    post:
+      tags:
+      - "ols"
+      summary: "creates ols.Ols"
+      description: "creates ols.Ols"
+      parameters:
+      - in: "body"
+        name: "ols.Ols.body-param"
+        description: "ols.Ols to be added to list"
+        required: false
+        schema:
+          $ref: "#/definitions/ols.OlsWrapper"
+      responses:
+        201:
+          description: "Object created"
+        400:
+          description: "Internal error"
+        409:
+          description: "Object already exists"
+    put:
+      tags:
+      - "ols"
+      summary: "creates or updates ols.Ols"
+      description: "creates or updates ols.Ols"
+      parameters:
+      - in: "body"
+        name: "ols.Ols.body-param"
+        description: "ols.Ols to be added or updated"
+        required: false
+        schema:
+          $ref: "#/definitions/ols.OlsWrapper"
+      responses:
+        201:
+          description: "Object created"
+        400:
+          description: "Internal error"
+        204:
+          description: "Object modified"
+    delete:
+      tags:
+      - "ols"
+      summary: "removes ols.Ols"
+      description: "removes ols.Ols"
+      parameters: []
+      responses:
+        400:
+          description: "Internal error"
+        204:
+          description: "Object deleted"
+  /data/ols/ols-signal={providerID}/:
+    get:
+      tags:
+      - "ols"
+      summary: "returns ols.ols.OlsSignal"
+      description: "an Optimal Load Shape signal"
+      parameters:
+      - name: "providerID"
+        in: "path"
+        description: "Id of ols-signal"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "ols.ols.OlsSignal"
+          schema:
+            $ref: "#/definitions/ols.ols.OlsSignalWrapper"
+        400:
+          description: "Internal error"
+  /data/ols/ols-signal={providerID}/optimal-load={timestamp}/:
+    get:
+      tags:
+      - "ols"
+      summary: "returns ols.optimalloadgroup.OptimalLoad"
+      description: "returns ols.optimalloadgroup.OptimalLoad"
+      parameters:
+      - name: "providerID"
+        in: "path"
+        description: "Id of ols-signal"
+        required: true
+        type: "string"
+      - name: "timestamp"
+        in: "path"
+        description: "Id of optimal-load"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "ols.optimalloadgroup.OptimalLoad"
+          schema:
+            $ref: "#/definitions/ols.optimalloadgroup.OptimalLoadWrapper"
+        400:
+          description: "Internal error"
+definitions:
+  ols.GeolocationGroup:
+    type: "object"
+    properties:
+      latitude:
+        type: "string"
+        description: "The latitude value on the astronomical body. The\n         \
+          \      definition and precision of this measurement is\n               indicated\
+          \ by the reference-frame value."
+      longitude:
+        type: "string"
+        description: "The longitude value on the astronomical body. The\n        \
+          \       definition and precision of this measurement is\n              \
+          \ indicated by the reference-frame."
+  ols.Ols:
+    type: "object"
+    properties:
+      ols-signal:
+        type: "array"
+        description: "an Optimal Load Shape signal"
+        items:
+          $ref: "#/definitions/ols.ols.OlsSignal"
+  ols.OlsWrapper:
+    properties:
+      ols:
+        $ref: "#/definitions/ols.Ols"
+  ols.OptimalLoadGroup:
+    type: "object"
+    properties:
+      optimal-load:
+        type: "array"
+        items:
+          $ref: "#/definitions/ols.optimalloadgroup.OptimalLoad"
+  ols.ols.OlsSignal:
+    allOf:
+    - $ref: "#/definitions/ols.GeolocationGroup"
+    - $ref: "#/definitions/ols.OptimalLoadGroup"
+    - type: "object"
+      properties:
+        providerID:
+          type: "string"
+          description: "a globally unique ID for the provider of this OLS signal"
+      description: "an Optimal Load Shape signal"
+  ols.ols.OlsSignalWrapper:
+    properties:
+      ols-signal:
+        $ref: "#/definitions/ols.ols.OlsSignal"
+  ols.optimalloadgroup.OptimalLoad:
+    type: "object"
+    properties:
+      ols-value:
+        type: "string"
+      timestamp:
+        type: "string"
+  ols.optimalloadgroup.OptimalLoadWrapper:
+    properties:
+      optimal-load:
+        $ref: "#/definitions/ols.optimalloadgroup.OptimalLoad"
